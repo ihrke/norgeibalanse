@@ -1,7 +1,35 @@
 
 #remotes::install_github("makinin/rdbhapi")
+library(tidyverse)
 library(rdbhapi)
 library(tidygeocoder)
+
+
+#' Abbreviation for Institutes at Fak level (i.e., duplicates between faculties can exist)
+#' 
+abbrev_inst <- function(iname){
+  str_to_lower(iname) |> 
+    str_replace_all("[,-.:]","") |> 
+    str_replace_all("for|og","") |> 
+    str_split(pattern = " ") |>
+    map_chr(\(nn){
+      map_chr(nn, \(nam){
+        if(nam=="institutt"){
+          return("I")
+        } else {
+          return(str_sub(nam,1,3) |> str_to_title())
+        }
+      }) |> paste0(collapse = "")
+    }) -> nnames
+  tab<-table(nnames) 
+  dups <- tab[tab> 1] # duplicates
+  for(dup in names(dups)){
+    nnames[nnames==dup] <- sprintf("%s%i",dup,1:dups[dup])
+  }
+  #any(duplicated(nnames))
+  nnames
+}
+
 
 #' ===========================================
 #' General info for institutes
@@ -15,7 +43,10 @@ level3 <- dbh_data(210) |>
          Nivå==3) |>
   select(-Nivå, -Nivå_tekst, -Institusjonsnavn, 
          -`fagkode avdeling`, -`fagnavn avdeling`, -`Avdelingskode (3 siste siffer)`,
-         -`Gyldig fra`, -`Gyldig til`)
+         -`Gyldig fra`, -`Gyldig til`) |>
+  group_by(Institusjonskode, Fakultetskode) |>
+  mutate(Kortnavn=abbrev_inst(Avdelingsnavn)) |>
+  ungroup()
 
 save(level3, file="data/level3.RData")
 

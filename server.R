@@ -368,7 +368,7 @@ if(enable.level3) { ##DEBUG
   
   output$level3table <- renderDataTable({
     level3 |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac()) |>
-      select(Avdelingsnavn)
+      select(Avdelingsnavn, Kortnavn)
   }, options=list(paging=T))
 
   
@@ -379,8 +379,9 @@ if(enable.level3) { ##DEBUG
     bar.col=c("red", "blue") # female/male colors
     
     lev3 <- level3 |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac())
+    #lev3 <- level3 |> filter(Institusjonskode==id.uni, Fakultetskode==id.fac)
     
-    sel.rows=input$level3table_rows_selected
+    sel.rows=sort(input$level3table_rows_selected)
     if(is.null(sel.rows)){ # show all unis initially
       sel.inst=NULL
     } else {
@@ -397,70 +398,51 @@ if(enable.level3) { ##DEBUG
         #level3.employees.positions |> filter(Institusjonskode==id.uni, Fakultetskode==id.fac, Avdelingskode==id.inst) -> dd
         sel.pos=input[[sprintf("%s_sel",plot.ids[ikode])]] 
         #sel.pos=c("Professor","Stipendiat") 
-        
-        # separate plots per selected profession
-        par(mfrow=c(length(sel.pos)+1,1) )
-        
-        # start with plot across everyone
-        dd |> group_by(Institusjonskode, Fakultetskode, Avdelingskode, Årstall) |>
-          summarize(`Antall kvinner`=sum(`Antall kvinner`),
-                    `Antall menn`=sum(`Antall menn`)) -> dd2
-        year=sort(unique(dd2$Årstall))
-        dd2 |> 
-          gather(var, val, all_of(c("Antall menn", "Antall kvinner"))) |> pull(val) |>
-          as.array() -> freq
-        dim(freq) <- c(2,length(year))
-        dimnames(freq) <- list(c("Kvinner","Menn"), year)
-        diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = bar.col, add.pct=T,
-                           sym = F, cluster.width = 0.33, panel.lty = 1, top.cex = 0.3)
-        for(position in sel.pos){ # plot per position
-          dd |> 
-            filter(Benevnelse==position) |> 
-            group_by(Institusjonskode, Fakultetskode, Avdelingskode, Årstall) |>
+
+        if(sel.pos=="All"){ ## sum across all positions
+          dd |> group_by(Institusjonskode, Fakultetskode, Avdelingskode, Årstall) |>
             summarize(`Antall kvinner`=sum(`Antall kvinner`),
                       `Antall menn`=sum(`Antall menn`)) -> dd2
           year=sort(unique(dd2$Årstall))
+          
           dd2 |> 
-            gather(var, val, all_of(c("Antall menn", "Antall kvinner"))) |> pull(val) |>
+            gather(var, val, all_of(c("Antall menn", "Antall kvinner"))) |> arrange(Årstall,var) |> pull(val) |>
             as.array() -> freq
           dim(freq) <- c(2,length(year))
           dimnames(freq) <- list(c("Kvinner","Menn"), year)
           diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = bar.col, add.pct=T,
                              sym = F, cluster.width = 0.33, panel.lty = 1, top.cex = 0.3)
-          title(main=position)
+        } else {
+          dd |> 
+            filter(Benevnelse==sel.pos) |> 
+            group_by(Institusjonskode, Fakultetskode, Avdelingskode, Årstall) |>
+            summarize(`Antall kvinner`=sum(`Antall kvinner`),
+                      `Antall menn`=sum(`Antall menn`)) -> dd2
+          year=sort(unique(dd2$Årstall))
+          print(dd2)
+          dd2 |> 
+            gather(var, val, all_of(c("Antall menn", "Antall kvinner"))) |>  arrange(Årstall,var) |> pull(val) |>
+            as.array() -> freq
+          dim(freq) <- c(2,length(year))
+          dimnames(freq) <- list(c("Kvinner","Menn"), year)
+          print(freq)
           
+          diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = bar.col, add.pct=T,
+                             sym = F, cluster.width = 0.33, panel.lty = 1, top.cex = 0.3)
+          title(main=sel.pos)
         }
-      #        
-      #  if(is.null(sel.pos)){ ## sum across all positions
-      #  } else {
-      #    # get correct order (according to "positions" defined in global.R)
-      #    sel.pos=factor(sel.pos, levels=positions) |> sort() |> as.character() 
-      #    dd |> filter(Benevnelse %in% sel.pos) |>
-      #      group_by(Institusjonskode, Fakultetskode, Avdelingskode, Årstall, Benevnelse) |>
-      #      summarize(`Antall kvinner`=sum(`Antall kvinner`),
-      #                `Antall menn`=sum(`Antall menn`)) -> dd        
-      #    }
-#
-      #  year=sort(unique(dd$Årstall))
-      #  dd |> 
-      #    gather(var, val, all_of(c("Antall menn", "Antall kvinner"))) |> pull(val) |>
-      #    as.array() -> freq
-      #  if(is.null(sel.pos)){
-      #    dim(freq) <- c(2,length(year))
-      #    dimnames(freq) <- list(c("Kvinner","Menn"), year)
-      #  } else {
-      #    dim(freq) <- c(2,length(year),length(sel.pos))
-      #    dimnames(freq) <- list(c("Kvinner","Menn"), year,sel.pos)
-      #  }
-        
-      }, height=500)
+
+      }, height=400)
     })   
     map(sel.inst, \(ikode){
-      
-      box(plotOutput(plot.ids[ikode]), 
-          pickerInput(sprintf("%s_sel",plot.ids[ikode]), label="Split by position", choices = positions, selected=NULL, multiple=TRUE), 
+      avail.pos <- level3.employees.positions |> 
+        filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac(), 
+               Avdelingskode==ikode) |> pull(Benevnelse) |> unique()
+      box(plotOutput(plot.ids[ikode], height=400), 
+          selectInput(sprintf("%s_sel",plot.ids[ikode]), label="Split by position", 
+                      choices = c("All",avail.pos), selected="All"), 
           title=inst.names[ikode], 
-          width = 6, height="100%")
+          width = 6, height="550")
     })
   })
     
