@@ -1,0 +1,41 @@
+{"tabell_id":123,"api_versjon":1,"statuslinje":"N","begrensning":"1000000","kodetekst":"J","desimal_separator":".",
+"groupBy":["Institusjonskode", "Avdelingskode", "Årstall", "Semester", "Studentkategori"],
+"sortBy":["Institusjonskode", "Avdelingskode"],
+"filter":[
+   {
+      "variabel": "Institusjonskode",
+      "selection": {
+         "filter": "all",
+         "values": [
+            "*"
+         ],
+         "exclude": [
+            ""
+         ]
+      }
+   },
+   {
+      "variabel": "Avdelingskode",
+      "selection": {
+         "filter": "all",
+         "values": [
+            "*"
+         ],
+         "exclude": [
+            ""
+         ]
+      }
+   },
+   {
+      "variabel": "Årstall",
+      "selection": {
+         "filter": "all",
+         "values": [
+            ""
+         ],
+         "exclude": [
+            ""
+         ]
+      }
+   }
+]} 
