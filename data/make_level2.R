@@ -1,7 +1,30 @@
 
 #remotes::install_github("makinin/rdbhapi")
+library(tidyverse)
 library(rdbhapi)
 library(tidygeocoder)
+
+
+#' Abbreviation for Fakulties at Uni level (i.e., duplicates between unis can exist)
+#' 
+abbrev_fac <- function(iname){
+  str_to_lower(iname) |> 
+    str_replace_all("[,-.:()]","") |> 
+    str_replace_all("for|og|det","") |> 
+    str_split(pattern = " ") |>
+    map_chr(\(nn){
+      map_chr(nn, \(nam){
+          str_sub(nam,1,3) |> str_to_title()
+      }) |> paste0(collapse = "")
+    }) -> nnames
+  tab<-table(nnames) 
+  dups <- tab[tab> 1] # duplicates
+  for(dup in names(dups)){
+    nnames[nnames==dup] <- sprintf("%s%i",dup,1:dups[dup])
+  }
+  #any(duplicated(nnames))
+  nnames
+}
 
 #' ===========================================
 #' General info for universities
@@ -13,8 +36,11 @@ level2 <- dbh_data(210) |>
          Nivå==2) |>
   select(-Nivå, -Nivå_tekst, -Institusjonsnavn, 
          -`fagkode avdeling`, -`fagnavn avdeling`, -`Avdelingskode (3 siste siffer)`,
-         -`Gyldig fra`, -`Gyldig til`)
-
+         -`Gyldig fra`, -`Gyldig til`) |>
+  group_by(Institusjonskode) |>
+  mutate(Kortnavn=abbrev_fac(Fakultetsnavn)) |>
+  ungroup()
+ 
 save(level2, file="data/level2.RData")
 
 

@@ -128,7 +128,7 @@ body <- dashboardBody(
                   ),
                   plotOutput("level2_balance_years",height="500px"), 
                   title="Gender Balance (all employees)", 
-                  width=12, height="600px"),     
+                  width=6, height="600px"),     
               box(
                   dropdownButton(
                       p("This figures shows the development of the overall gender balance
@@ -140,7 +140,7 @@ body <- dashboardBody(
                   ),
                   plotOutput("level2_balance_students_years", height="500px"), 
                   title="Gender Balance (all students)", 
-                  width=12, height="600px"),                
+                  width=6, height="600px"),                
       ),
       
       
@@ -151,11 +151,11 @@ body <- dashboardBody(
               fillRow(
                 selectInput("level3_selectuni", "Select Institusjon: ", 
                             unique(level1$Kortnavn), selected = "UiT",
-                            width="200px"),
+                            width="45%"),
                 selectInput("level3_selectfac", "Select Faculty: ", 
                             unique(level2$Avdelingsnavn), selected = "Det helsevitenskapelige fakultet",
-                            width="200px"),
-                height="60px", width="50%"
+                            width="45%"),
+                height="80px", width="100%"
               ),
               htmlOutput('level3_title'),
               box(DT::dataTableOutput("level3table"), 
@@ -173,7 +173,7 @@ body <- dashboardBody(
                 ),
                 plotOutput("level3_balance_years",height="500px"), 
                 title="Gender Balance (all employees)", 
-                width=12, height="600px"),     
+                width=6, height="600px"),     
               box(
                 dropdownButton(
                   p("This figures shows the development of the overall gender balance
@@ -185,7 +185,7 @@ body <- dashboardBody(
                 ),
                 plotOutput("level3_balance_students_years", height="500px"), 
                 title="Gender Balance (all students)", 
-                width=12, height="600px")             
+                width=6, height="600px")             
       ),
       # ------------------------------------------------------------------------
       # Help

@@ -25,8 +25,8 @@ id.uni=1130 # UiT
 id.fac=510 # Helsefak
 id.inst="510260" # IPS
 
-enable.level1=F
-enable.level2=F
+enable.level1=T
+enable.level2=T
 enable.level3=T
 
 # ------------------------------------------------------------------------
