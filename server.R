@@ -1,11 +1,13 @@
 shinyServer(function(input, output, session) {
-  rv.level1.selected <- reactiveVal(NULL)
   # ------------------------------------------------------------------------
   # Level 1
   # ------------------------------------------------------------------------
 
 if(enable.level1) {## DEBUG
-  
+
+  rv.level1.selected_uni <- reactiveVal(NULL)  
+
+    
   output$level1map <- renderLeaflet({
     leaflet(data = level1) |>
       addProviderTiles(providers$Stamen.Watercolor) |>
@@ -19,16 +21,14 @@ if(enable.level1) {## DEBUG
   })
   
   # update the currently selected list of level1-institutions (Institusjonskode)
-  ## DOES NOT QUITE WORK for some reason; check back later?
-  observeEvent(input$level1table_rows_selected, {
+  observe({
     sel.rows=input$level1table_rows_selected
     if(is.null(sel.rows)){ # show all unis initially
       sel.rows=1:dim(level1)[1]
     }
     sel.uni=level1$Institusjonskode[sel.rows]
-    rv.level1.selected(sel.uni)             # rv$value <- newValue
-    
-    print(rv.level1.selected)
+    rv.level1.selected_uni(sel.uni)             # rv$value <- newValue
+    #cat("UPDATE: ",sel.uni)
   })  
   
   level1table.proxy = dataTableProxy('level1table')
@@ -46,18 +46,42 @@ if(enable.level1) {## DEBUG
     ## select row corresponding to selected marker
     level1table.proxy |> selectRows(ix)
     
+    rv.level1.selected_uni(d$Institusjonskode)             # rv$value <- newValue
+  })
+
+  
+  #'
+  #' Total num students/employees
+  #'------------
+  output$level1_total_num <- renderPlot({
+    sel.uni=rv.level1.selected_uni() 
+
+    left_join(level1, level1.employees, by="Institusjonskode") |>
+      filter(Årstall==max(Årstall)) |> # current year only
+      rename(male_employees=`Antall menn`, female_employees=`Antall kvinner`) |>
+      left_join(level1.students, by=c("Institusjonskode", "Årstall")) |>
+      rename(male_students=`Antall menn`, female_students=`Antall kvinner`) |>
+      gather(var, number, male_students, female_students, male_employees, female_employees) |>
+      separate(var, c("gender","type")) |>
+      mutate(highlight=(Institusjonskode %in% sel.uni)) -> d.tmp
+    
+    d.tmp |> 
+      ggplot(aes(x=reorder(Kortnavn, `Antall totalt.x`), y=number, fill=gender,alpha=highlight))+
+      geom_bar(stat="identity")+coord_flip()+
+      labs(y="Number of employees", x="")+
+      scale_fill_manual(values=colors.female.male)+
+      scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
+      facet_wrap(~type,ncol = 2, scales="free_x")+
+      theme(legend.position="top")
+    
   })
 
   #'
   #' Proportion per year
   #'------------
   output$level1_balance_years <- renderPlot({
-    sel.rows=input$level1table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(level1)[1]
-    }
-    sel.uni=level1$Institusjonskode[sel.rows]
-    
+    sel.uni=rv.level1.selected_uni() 
+
     left_join(level1, level1.employees, by="Institusjonskode") |>
       mutate(highlight=(Institusjonskode %in% sel.uni)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
@@ -77,11 +101,8 @@ if(enable.level1) {## DEBUG
   #' Proportion (students) per year
   #'------------
   output$level1_balance_students_years <- renderPlot({
-    sel.rows=input$level1table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(level1)[1]
-    }
-    sel.uni=level1$Institusjonskode[sel.rows]
+    sel.uni=rv.level1.selected_uni() 
+    
     left_join(level1, level1.students, by="Institusjonskode") |>
       mutate(highlight=(Institusjonskode %in% sel.uni)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> 
@@ -102,11 +123,7 @@ if(enable.level1) {## DEBUG
   #' "Prestige plot"
   #'------------
   output$level1_prestigeplot <- renderPlot({
-    sel.rows=input$level1table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(level1)[1]
-    }
-    sel.uni=level1$Institusjonskode[sel.rows]
+    sel.uni=rv.level1.selected_uni() 
     
     cur.year=max(level1.employees$Årstall)
     ref.year=input$level1_prestigeplot_refyear
@@ -155,12 +172,8 @@ if(enable.level1) {## DEBUG
   #' "Scissors plot"
   #'------------
   output$level1_scissorsplot <- renderPlot({
-    sel.rows=input$level1table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(level1)[1]
-    }
-    sel.uni=level1$Institusjonskode[sel.rows]
-    
+    sel.uni=rv.level1.selected_uni() 
+
     level1.students |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`,
              Benevnelse="Student") |>
@@ -190,11 +203,7 @@ if(enable.level1) {## DEBUG
   #' "Sperm plot"
   #'------------
   output$level1_spermplot <- renderPlot({
-    sel.rows=input$level1table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(level1)[1]
-    }
-    sel.uni=level1$Institusjonskode[sel.rows]
+    sel.uni=rv.level1.selected_uni() 
     
     level1.students |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`,
@@ -237,26 +246,37 @@ if(enable.level1) {## DEBUG
   # ------------------------------------------------------------------------
 
 if( enable.level2 ){ ## DEBUG  
+  rv.level2.selected_fac <- reactiveVal(NULL)
+  rv.level2.num_fac <- reactiveVal(NULL)
+  
+  observe({
+    uni.sel=first(rv.level1.selected_uni())  
+    lev2 <- level2 |> filter(Institusjonskode==uni.sel)
+    
+    sel.rows=input$level2table_rows_selected
+    if(is.null(sel.rows)){ # show all unis initially
+      sel.rows=1:dim(lev2)[1]
+    }
+    sel.fac=lev2$Fakultetskode[sel.rows]
+    rv.level2.selected_fac(sel.fac)
+    rv.level2.num_fac(dim(lev2)[1])
+  })  
   
   output$level2_title <- renderUI({
-    uni.kort=input$level2_selectuni
-    
-    #sel.rows=input$level1table_rows_selected
-    #uni <- level1$Institusjonskode[sel.rows][1]
-    level1 |> filter(Kortnavn==uni.kort) |>
+    uni.sel <- first(rv.level1.selected_uni())
+    level1 |>
+      filter(Institusjonskode==uni.sel) |>
       mutate(uniname=glue("{Institusjonsnavn} ({Kortnavn})")) -> d.tmp
     uniname <- d.tmp |> pull(uniname)
-    uniid <- d.tmp |> pull(Institusjonskode)
-    
 
-    p(img(src=get_logo(uniid, version="wide", link_type="www"), width="300px"),
+    p(img(src=get_logo(uni.sel, version="wide", link_type="www"), width="300px"),
       h1(uniname))
   })
   
   output$level2table <- renderDataTable({
-    uni=level1$Institusjonskode[level1$Kortnavn==input$level2_selectuni]
+    uni.sel=first(rv.level1.selected_uni())  
     
-    level2 |> filter(Institusjonskode==uni) |>
+    level2 |> filter(Institusjonskode==uni.sel) |>
       select(Fakultetsnavn,Kortnavn)
   }, options=list(paging=T))
 
@@ -264,17 +284,12 @@ if( enable.level2 ){ ## DEBUG
   #' Proportion per year
   #'------------
   output$level2_balance_years <- renderPlot({
-    uni=level1$Institusjonskode[level1$Kortnavn==input$level2_selectuni]
-    lev2 <- level2 |> filter(Institusjonskode==uni)
+    uni.sel=first(rv.level1.selected_uni())  
+    sel.fac= rv.level2.selected_fac()
     
-    sel.rows=input$level2table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(lev2)[1]
-    }
-    sel.fac=lev2$Avdelingskode[sel.rows]
-    
-    left_join(lev2, level2.employees, by=c("Institusjonskode", "Avdelingskode")) |>
-      mutate(highlight=(Avdelingskode %in% sel.fac)) |> 
+    level2 |> filter(Institusjonskode==uni.sel) |>
+      left_join(level2.employees, by=c("Institusjonskode", "Avdelingskode")) |>
+      mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
     
     d.tmp |> 
@@ -284,7 +299,7 @@ if( enable.level2 ){ ## DEBUG
       geom_text_repel(data=d.tmp |> group_by(Kortnavn) |> 
                         filter(Årstall==max(Årstall)) |> ungroup(), aes(label=Kortnavn), force=50)+
       scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
-      scale_shape_manual(values=1:dim(lev2)[1])+
+      scale_shape_manual(values=1:rv.level2.num_fac())+
       guides(color = guide_legend(override.aes = list(label=""))) +
       annotate("text_repel", x=min(level2.employees$Årstall), 
                y=50+0.02*diff(range(d.tmp$`Percent Male`)), 
@@ -297,20 +312,15 @@ if( enable.level2 ){ ## DEBUG
   #' Proportion (students) per year
   #'------------
   output$level2_balance_students_years <- renderPlot({
-    uni=level1$Institusjonskode[level1$Kortnavn==input$level2_selectuni]
-    lev2 <- level2 |> filter(Institusjonskode==uni)
+    uni.sel=first(rv.level1.selected_uni())  
+    sel.fac= rv.level2.selected_fac()
     
-    sel.rows=input$level2table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(lev2)[1]
-    }
-    sel.fac=lev2$Avdelingskode[sel.rows]
-    
-    left_join(lev2, level2.students, by=c("Institusjonskode", "Avdelingskode")) |>
-      mutate(highlight=(Avdelingskode %in% sel.fac)) |> 
+    level2 |> filter(Institusjonskode==uni.sel) |>
+      left_join(level2.students, by=c("Institusjonskode", "Avdelingskode")) |>
+      mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
+      na.omit() |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
-      #filter(Årstall>1995) -> d.tmp
-    
+
     d.tmp |>
       ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
       geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
@@ -319,7 +329,7 @@ if( enable.level2 ){ ## DEBUG
                         filter(Årstall==max(Årstall)) |> ungroup(), 
                       aes(label=Kortnavn), force = 50)+
       scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
-      scale_shape_manual(values=1:dim(lev2)[1])+
+      scale_shape_manual(values=1:rv.level2.num_fac())+
       guides(color = guide_legend(override.aes = list(label=""))) +
       annotate("text_repel", x=min(d.tmp$Årstall), y=50+0.02*diff(range(d.tmp$`Percent Male`)), 
                label="Perfect balance", color="grey")+
@@ -333,41 +343,44 @@ if( enable.level2 ){ ## DEBUG
   # ------------------------------------------------------------------------
   
 if(enable.level3) { ##DEBUG
-  
-  rv.level3.selected_uni <- reactiveVal(NULL)
-  rv.level3.selected_fac <- reactiveVal(NULL)
-  
+  rv.level3.selected_inst <- reactiveVal(NULL)
+
   observe({
-    uni <- input$level3_selectuni
-    unikode=first(level1$Institusjonskode[level1$Kortnavn==uni])
-    rv.level3.selected_uni(unikode)             # rv$value <- newValue
-    facs=unique(level3$Fakultetsnavn[level3$Institusjonskode==unikode]);
-    updateSelectInput(session, "level3_selectfac",
-                      choices=facs,
-                      selected=facs[1])
-  })
-  observe({
-    fac <- input$level3_selectfac
+    sel.uni <- first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
     
-    fackode=(level2 |> filter(Institusjonskode==rv.level3.selected_uni(), Avdelingsnavn==fac) |> pull(Fakultetskode))
-    rv.level3.selected_fac(fackode)
+    lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
+    
+    sel.rows=sort(input$level3table_rows_selected)
+    if(is.null(sel.rows)){ # show all unis initially
+      sel.inst=NULL
+    } else {
+      sel.inst=lev3$Avdelingskode[sel.rows]
+    }
+    rv.level3.selected_inst(sel.inst)
+    cat("UPDATE LEV3: ", sel.inst)
   })
   
   
   output$level3_title <- renderUI({
-    level1 |> filter(Institusjonskode==rv.level3.selected_uni()) |>
+    sel.uni <- first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
+    
+    level1 |> filter(Institusjonskode==sel.uni) |>
       mutate(uniname=glue("{Institusjonsnavn} ({Kortnavn})")) -> d.tmp
     uniname <- d.tmp |> pull(uniname)
     uniid <- d.tmp |> pull(Institusjonskode)
-    level2 |> filter(Institusjonskode==uniid, Fakultetskode==rv.level3.selected_fac()) |>
+    level2 |> filter(Institusjonskode==uniid, Fakultetskode==sel.fac) |>
       pull(Avdelingsnavn) -> facname
     
-    p(img(src=get_logo(uniid, version="wide", link_type="www"), width="300px"),
+    p(img(src=get_logo(sel.uni, version="wide", link_type="www"), width="300px"),
       h1(uniname), h2(facname))
   })
   
   output$level3table <- renderDataTable({
-    level3 |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac()) |>
+    sel.uni <- first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
+    level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac) |>
       select(Avdelingsnavn, Kortnavn)
   }, options=list(paging=T))
 
@@ -376,28 +389,20 @@ if(enable.level3) { ##DEBUG
   #' Separate boxes with diverging pips over years for selected institutes
   #'------------
   output$level3_divpips <- renderUI({
-    bar.col=c("red", "blue") # female/male colors
+    sel.uni <- first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
+    sel.inst <- rv.level3.selected_inst()
     
-    lev3 <- level3 |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac())
-    #lev3 <- level3 |> filter(Institusjonskode==id.uni, Fakultetskode==id.fac)
+    lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
     
-    sel.rows=sort(input$level3table_rows_selected)
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.inst=NULL
-    } else {
-      sel.inst=lev3$Avdelingskode[sel.rows]
-    }
-
     plot.ids <- sprintf("level3_divpips_%s",sel.inst)
     names(plot.ids) <- sel.inst
     inst.names <- lev3 |> filter(Avdelingskode %in% sel.inst) |> pull(Avdelingsnavn)
     names(inst.names) <- sel.inst
     map(sel.inst, \(ikode){
       output[[plot.ids[ikode]]] <- renderPlot({
-        level3.employees.positions |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac(), Avdelingskode==ikode) -> dd
-        #level3.employees.positions |> filter(Institusjonskode==id.uni, Fakultetskode==id.fac, Avdelingskode==id.inst) -> dd
+        level3.employees.positions |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac, Avdelingskode==ikode) -> dd
         sel.pos=input[[sprintf("%s_sel",plot.ids[ikode])]] 
-        #sel.pos=c("Professor","Stipendiat") 
 
         if(sel.pos=="All"){ ## sum across all positions
           dd |> group_by(Institusjonskode, Fakultetskode, Avdelingskode, Årstall) |>
@@ -410,7 +415,7 @@ if(enable.level3) { ##DEBUG
             as.array() -> freq
           dim(freq) <- c(2,length(year))
           dimnames(freq) <- list(c("Kvinner","Menn"), year)
-          diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = bar.col, add.pct=T,
+          diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = colors.female.male, add.pct=T,
                              sym = F, cluster.width = 0.33, panel.lty = 1, top.cex = 0.3)
         } else {
           dd |> 
@@ -427,7 +432,7 @@ if(enable.level3) { ##DEBUG
           dimnames(freq) <- list(c("Kvinner","Menn"), year)
           print(freq)
           
-          diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = bar.col, add.pct=T,
+          diverging_pip_plot(freq, bar.width = .3, bar.width.n = 4, bar.col = colors.female.male, add.pct=T,
                              sym = F, cluster.width = 0.33, panel.lty = 1, top.cex = 0.3)
           title(main=sel.pos)
         }
@@ -436,7 +441,7 @@ if(enable.level3) { ##DEBUG
     })   
     map(sel.inst, \(ikode){
       avail.pos <- level3.employees.positions |> 
-        filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac(), 
+        filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac, 
                Avdelingskode==ikode) |> pull(Benevnelse) |> unique()
       box(plotOutput(plot.ids[ikode], height=400), 
           selectInput(sprintf("%s_sel",plot.ids[ikode]), label="Show position", 
@@ -452,17 +457,16 @@ if(enable.level3) { ##DEBUG
   #' Proportion per year
   #'------------
   output$level3_balance_years <- renderPlot({
-    lev3 <- level3 |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac())
+    sel.uni <- first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
+    sel.inst <- rv.level3.selected_inst()
+
     
-    sel.rows=input$level3table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(lev3)[1]
-    }
-    sel.inst=lev3$Avdelingskode[sel.rows]
+    lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
     
     lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode) |> 
       left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
-      mutate(highlight=(Avdelingskode %in% sel.inst)) |> 
+      mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
     
     d.tmp |> 
@@ -486,17 +490,16 @@ if(enable.level3) { ##DEBUG
   #' Proportion (students) per year
   #'------------
   output$level3_balance_students_years <- renderPlot({
-    lev3 <- level3 |> filter(Institusjonskode==rv.level3.selected_uni(), Fakultetskode==rv.level3.selected_fac())
+    sel.uni <- first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
+    sel.inst <- rv.level3.selected_inst()
     
-    sel.rows=input$level3table_rows_selected
-    if(is.null(sel.rows)){ # show all unis initially
-      sel.rows=1:dim(lev3)[1]
-    }
-    sel.inst=lev3$Avdelingskode[sel.rows]
+    
+    lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
 
     lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode) |> 
       left_join(level3.students, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
-      mutate(highlight=(Avdelingskode %in% sel.inst)) |> 
+      mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
     if(dim(d.tmp)[1]!=0){
       d.tmp |> 

@@ -24,8 +24,17 @@ body <- dashboardBody(
                     title="Institutions in Norway", 
                     width=5),
                 box(DT::dataTableOutput("level1table"), 
-                    title="Institusjoner", 
+                    title="Universities", 
                     width=7),
+                box(
+                  dropdownButton(
+                    p("This figures the total number of students and employees at each university."),
+                    icon = icon("info-circle"), width = "100%", size='sm',
+                    tooltip = tooltipOptions(title = "Click for help")
+                  ),
+                  plotOutput("level1_total_num"), 
+                  title="Total number of employees and students", 
+                  width=6),                
                 box(
                     dropdownButton(
                     p("This figures shows the development of the overall gender balance
@@ -110,9 +119,6 @@ body <- dashboardBody(
       # Level 2
       # ------------------------------------------------------------------------
       tabItem(tabName = "level2",
-              selectInput("level2_selectuni", "Select Institusjon: ", 
-                          unique(level1$Kortnavn), selected = "UiT",
-                          width="200px"),
               htmlOutput('level2_title'),
               box(DT::dataTableOutput("level2table"), 
                   title="Fakulteter", 
@@ -148,15 +154,6 @@ body <- dashboardBody(
       # Level 3
       # ------------------------------------------------------------------------
       tabItem(tabName = "level3",
-              fillRow(
-                selectInput("level3_selectuni", "Select Institusjon: ", 
-                            unique(level1$Kortnavn), selected = "UiT",
-                            width="45%"),
-                selectInput("level3_selectfac", "Select Faculty: ", 
-                            unique(level2$Avdelingsnavn), selected = "Det helsevitenskapelige fakultet",
-                            width="45%"),
-                height="80px", width="100%"
-              ),
               htmlOutput('level3_title'),
               box(DT::dataTableOutput("level3table"), 
                   title="Institutes", 

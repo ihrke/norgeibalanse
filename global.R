@@ -29,6 +29,8 @@ enable.level1=T
 enable.level2=T
 enable.level3=T
 
+colors.female.male <- c("red", "blue") # female/male colors
+
 # ------------------------------------------------------------------------
 # LEVEL 1
 # ------------------------------------------------------------------------
