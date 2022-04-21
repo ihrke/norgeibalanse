@@ -56,7 +56,8 @@ level1 |>
 
          ")) -> level1
 
-positions <- c("Student", "Stipendiat", "Postdoktor", "Førsteamanuensis", "Professor")
+load("data/positions.RData")
+default.positions <- c("Student", "Stipendiat", "Postdoktor", "Førsteamanuensis", "Professor")
 
 
 #' icons on maps are universities own icons...? Looks ugly, if we want it, we need to add some work

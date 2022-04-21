@@ -1,4 +1,24 @@
 shinyServer(function(input, output, session) {
+  
+  # ------------------------------------------------------------------------
+  # General settings
+  # ------------------------------------------------------------------------
+
+  # global switch to hide unselected institutions 
+  observe({
+    hide <- input$all_hideunselected
+    
+    switches=c("level1_spermplot_hideunselected","level1_scissorsplot_hideunselected",
+               "level1_balance_years_hideunselected","level1_balance_students_years_hideunselected",
+               "level1_prestigeplot_hideunselected",
+               "level2_balance_years_hideunselected","level2_balance_students_years_hideunselected",
+               "level3_balance_years_hideunselected","level3_balance_students_years_hideunselected"
+               )
+      for(switch in switches){
+        updateMaterialSwitch(session,switch,value=hide)
+      }
+  })
+    
   # ------------------------------------------------------------------------
   # Level 1
   # ------------------------------------------------------------------------
@@ -85,6 +105,10 @@ if(enable.level1) {## DEBUG
     left_join(level1, level1.employees, by="Institusjonskode") |>
       mutate(highlight=(Institusjonskode %in% sel.uni)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
+
+    if(input$level1_balance_years_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
     
     d.tmp |> 
       ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
@@ -107,6 +131,10 @@ if(enable.level1) {## DEBUG
       mutate(highlight=(Institusjonskode %in% sel.uni)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> 
       filter(Årstall>1995) -> d.tmp
+
+    if(input$level1_balance_students_years_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
     
     d.tmp |>
       ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
@@ -143,6 +171,11 @@ if(enable.level1) {## DEBUG
     grid.maj.y=c(0,25,50,75,100)
     grid.min.x=c(12.5, 37.5, 62.5, 87.5)
     grid.min.y=c(12.5, 37.5, 62.5, 87.5)
+
+    if(input$level1_prestigeplot_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+
     d.tmp |> 
       ggplot(aes(alpha=highlight))+
       geom_rect(data=bgdat, aes(xmin=-Inf, xmax=Inf, ymin=v, ymax=v+1, fill=c), alpha=1, show.legend=F)+
@@ -173,7 +206,8 @@ if(enable.level1) {## DEBUG
   #'------------
   output$level1_scissorsplot <- renderPlot({
     sel.uni=rv.level1.selected_uni() 
-
+    disp.positions <- input$level1_scissorsplot_positions
+    
     level1.students |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`,
              Benevnelse="Student") |>
@@ -181,16 +215,23 @@ if(enable.level1) {## DEBUG
     
     cur.year=max(level1.employees.positions$Årstall)
     level1.employees.positions |>
-      filter(Benevnelse %in% positions) |>
+      filter(Benevnelse %in% disp.positions) |>
       group_by(Institusjonskode, Årstall,Benevnelse) |> # get rid of different Stillingskode for same Benevnelse
       summarise(`Antall menn`=sum(`Antall menn`), `Antall årsverk`=sum(`Antall årsverk`), .groups="drop") |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall årsverk`) |>
       select(-`Antall menn`,-`Antall årsverk`) |> 
       full_join(d.stud) |>
-      mutate(Benevnelse=factor(Benevnelse, levels=positions)) |> arrange(Institusjonskode, Årstall, Benevnelse) |>
+      filter(Benevnelse %in% disp.positions) |>
+      mutate(Benevnelse=factor(Benevnelse, levels=disp.positions)) |> arrange(Institusjonskode, Årstall, Benevnelse) |>
       left_join(level1) |> 
-      mutate(Benevnelse=factor(Benevnelse, levels=positions)) |> 
-      mutate(highlight=(Institusjonskode %in% sel.uni)) |> 
+      mutate(Benevnelse=factor(Benevnelse, levels=disp.positions)) |> 
+      mutate(highlight=(Institusjonskode %in% sel.uni)) -> d.tmp
+    
+    if(input$level1_scissorsplot_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
+    d.tmp |>
       ggplot(aes(x=Benevnelse, y=`Percent Male`, alpha=highlight))+
         geom_line(aes(group=Årstall,color=Årstall))+
         geom_hline(yintercept = 50, linetype="dashed", color="grey", size=1)+
@@ -213,21 +254,26 @@ if(enable.level1) {## DEBUG
     ref.cat=input$level1_spermplot_refpos
     target.cat=input$level1_spermplot_maxpos
     cur.year=max(level1.employees.positions$Årstall)
-    
     level1.employees.positions |>
-      filter(Benevnelse %in% positions) |>
+      filter(Benevnelse %in% default.positions) |>
       group_by(Institusjonskode, Årstall,Benevnelse) |> # get rid of different Stillingskode for same Benevnelse
       summarise(`Antall menn`=sum(`Antall menn`), `Antall årsverk`=sum(`Antall årsverk`), .groups="drop") |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall årsverk`) |>
       select(-`Antall menn`,-`Antall årsverk`) |> 
       full_join(d.stud) |>
-      mutate(Benevnelse=factor(Benevnelse, levels=positions)) |> arrange(Institusjonskode, Årstall, Benevnelse) |>
+      mutate(Benevnelse=factor(Benevnelse, levels=default.positions)) |> arrange(Institusjonskode, Årstall, Benevnelse) |>
       left_join(level1) |> 
-      mutate(Benevnelse=factor(Benevnelse, levels=positions)) |> 
+      mutate(Benevnelse=factor(Benevnelse, levels=default.positions)) |> 
       mutate(highlight=(Institusjonskode %in% sel.uni)) |>
       mutate(current.year=Årstall==cur.year) |>
       filter(Benevnelse %in% c(ref.cat, target.cat)) |>
-      spread(Benevnelse, `Percent Male`) -> d.tmp
+      spread(Benevnelse, `Percent Male`) |>
+      mutate(Kortnavn=factor(Kortnavn)) -> d.tmp
+    
+    if(input$level1_spermplot_hideunselected){
+      d.tmp |> filter(highlight==T) -> d.tmp  
+    }
+    
     d.tmp |>
       ggplot(aes_(x=as.name(ref.cat), y=as.name(target.cat), alpha=as.name("highlight")))+
         geom_point(aes(color=Kortnavn, size=current.year))+
@@ -292,6 +338,10 @@ if( enable.level2 ){ ## DEBUG
       mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
     
+    if(input$level2_balance_years_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
     d.tmp |> 
       ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
       geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
@@ -321,6 +371,10 @@ if( enable.level2 ){ ## DEBUG
       na.omit() |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
 
+    if(input$level2_balance_students_years_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
     d.tmp |>
       ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
       geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
@@ -469,6 +523,10 @@ if(enable.level3) { ##DEBUG
       mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
     
+    if(input$level3_balance_years_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
     d.tmp |> 
       ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
       geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
@@ -501,7 +559,13 @@ if(enable.level3) { ##DEBUG
       left_join(level3.students, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
       mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
+    
+    if(input$level3_balance_students_years_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
     if(dim(d.tmp)[1]!=0){
+      
       d.tmp |> 
         ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
         geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+

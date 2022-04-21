@@ -92,3 +92,12 @@ dbhd.123 |> filter(Institusjonskode %in% unique(level1$Institusjonskode)) |>
   ungroup() -> level1.students
 save(level1.students, file="data/level1_students.RData")
 
+#' ===========================================
+#' Employee codes
+#' ===========================================
+dbh.220 <- dbh_data(220) 
+
+positions.all <- dbh.220 |> group_by(Benevnelse) |>
+  summarize() |> filter(Benevnelse!="Stipendiat") |> pull(Benevnelse) # remove Stipendiat and put back in front
+positions.all <- c("Student", "Stipendiat", positions.all) 
+save(positions.all, file="data/positions.RData")

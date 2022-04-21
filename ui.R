@@ -4,7 +4,14 @@ sidebar <- dashboardSidebar(
         menuItem("Level 1: Institutions", tabName = "level1", icon = icon("university")),
         menuItem("Level 2: Faculties", tabName = "level2", icon = icon("school")),
         menuItem("Level 3: Institutes", tabName = "level3", icon = icon("building") ),
-        menuItem("Help", icon = icon("question-circle"), tabName = "help")
+        menuItem("Help", icon = icon("question-circle"), tabName = "help"),
+        hr(),
+        materialSwitch(
+          inputId = "all_hideunselected",
+          label = "Hide unselected: ",
+          value = FALSE, 
+          status = "info"
+        )
     )
 )
 
@@ -45,6 +52,12 @@ body <- dashboardBody(
                     tooltip = tooltipOptions(title = "Click for help")
                     ),
                     plotOutput("level1_balance_years"), 
+                    materialSwitch(
+                      inputId = "level1_balance_years_hideunselected",
+                      label = "Hide unselected: ",
+                      value = FALSE, 
+                      status = "info"
+                    ),                    
                     title="Gender Balance (all employees)", 
                     width=6),
                 box(
@@ -57,6 +70,12 @@ body <- dashboardBody(
                         tooltip = tooltipOptions(title = "Click for help")
                     ),
                     plotOutput("level1_balance_students_years"), 
+                    materialSwitch(
+                      inputId = "level1_balance_students_years_hideunselected",
+                      label = "Hide unselected: ",
+                      value = FALSE, 
+                      status = "info"
+                    ),                         
                     title="Gender Balance (all students)", 
                     width=6),                
                 box(
@@ -69,6 +88,12 @@ body <- dashboardBody(
                     tooltip = tooltipOptions(title = "Click for help")
                     ),
                     plotOutput("level1_prestigeplot"), 
+                    materialSwitch(
+                      inputId = "level1_prestigeplot_hideunselected",
+                      label = "Hide unselected: ",
+                      value = FALSE, 
+                      status = "info"
+                    ),     
                     selectInput("level1_prestigeplot_refyear", "Reference year: ", 
                                 sort(unique(level1.employees$Årstall),decreasing=T)[-1],
                                 width="33%"),
@@ -88,12 +113,18 @@ body <- dashboardBody(
                         tooltip = tooltipOptions(title = "Click for help")
                     ),
                     plotOutput("level1_spermplot"), 
+                    materialSwitch(
+                      inputId = "level1_spermplot_hideunselected",
+                      label = "Hide unselected: ",
+                      value = FALSE, 
+                      status = "info"
+                    ),
                     fillRow(
                         selectInput("level1_spermplot_refpos", "Reference position: ", 
-                                    positions, selected = "Student",
+                                    default.positions, selected = "Student",
                                     width="80%"),
                         selectInput("level1_spermplot_maxpos", "High-prestige position: ", 
-                                    positions, selected = "Professor",
+                                    default.positions, selected = "Professor",
                                     width="80%"),
                         height="60px",
                         ),
@@ -111,6 +142,22 @@ body <- dashboardBody(
                     tooltip = tooltipOptions(title = "Click for help")
                 ),
                     plotOutput("level1_scissorsplot"), 
+                    materialSwitch(
+                      inputId = "level1_scissorsplot_hideunselected",
+                      label = "Hide unselected: ",
+                      value = FALSE, 
+                      status = "info"
+                    ),
+                  #box(
+                    multiInput("level1_scissorsplot_positions", label="Positions: ",
+                               choices=positions.all, selected=default.positions,
+                               options = list(
+                                 enable_search = TRUE,
+                                 non_selected_header = "Choose between:",
+                                 selected_header = "You have selected:"
+                               )
+                  #  ), collapsible = TRUE, width=12, title="Configure Plot",
+                  ),
                     title="Gender Balance by position (all employees)", 
                     width=6),
                 
@@ -133,6 +180,12 @@ body <- dashboardBody(
                       tooltip = tooltipOptions(title = "Click for help")
                   ),
                   plotOutput("level2_balance_years",height="500px"), 
+                  materialSwitch(
+                    inputId = "level2_balance_years_hideunselected",
+                    label = "Hide unselected: ",
+                    value = FALSE, 
+                    status = "info"
+                  ),  
                   title="Gender Balance (all employees)", 
                   width=6, height="600px"),     
               box(
@@ -145,6 +198,12 @@ body <- dashboardBody(
                       tooltip = tooltipOptions(title = "Click for help")
                   ),
                   plotOutput("level2_balance_students_years", height="500px"), 
+                  materialSwitch(
+                    inputId = "level2_balance_students_years_hideunselected",
+                    label = "Hide unselected: ",
+                    value = FALSE, 
+                    status = "info"
+                  ),  
                   title="Gender Balance (all students)", 
                   width=6, height="600px"),                
       ),
@@ -169,6 +228,12 @@ body <- dashboardBody(
                   tooltip = tooltipOptions(title = "Click for help")
                 ),
                 plotOutput("level3_balance_years",height="500px"), 
+                materialSwitch(
+                  inputId = "level3_balance_years_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),  
                 title="Gender Balance (all employees)", 
                 width=6, height="600px"),     
               box(
@@ -181,6 +246,12 @@ body <- dashboardBody(
                   tooltip = tooltipOptions(title = "Click for help")
                 ),
                 plotOutput("level3_balance_students_years", height="500px"), 
+                materialSwitch(
+                  inputId = "level3_balance_students_years_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),  
                 title="Gender Balance (all students)", 
                 width=6, height="600px")             
       ),
