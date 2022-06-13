@@ -12,7 +12,9 @@ shinyServer(function(input, output, session) {
                "level1_balance_years_hideunselected","level1_balance_students_years_hideunselected",
                "level1_prestigeplot_hideunselected",
                "level2_balance_years_hideunselected","level2_balance_students_years_hideunselected",
-               "level3_balance_years_hideunselected","level3_balance_students_years_hideunselected"
+               "level2_prestigeplot_hideunselected",
+               "level3_balance_years_hideunselected","level3_balance_students_years_hideunselected",
+               "level3_prestigeplot_hideunselected"
                )
       for(switch in switches){
         updateMaterialSwitch(session,switch,value=hide)
@@ -390,6 +392,63 @@ if( enable.level2 ){ ## DEBUG
       theme(legend.position="bottom")
   })
   
+  #'
+  #' "Prestige plot"
+  #'------------
+  output$level2_prestigeplot <- renderPlot({
+    sel.uni=rv.level1.selected_uni() 
+    sel.fac= rv.level2.selected_fac()
+    
+    cur.year=max(level2.employees$Årstall)
+    ref.year=input$level2_prestigeplot_refyear
+    
+    level2 |> filter(Institusjonskode==sel.uni) |>
+      left_join(level2.employees, by=c("Institusjonskode", "Avdelingskode")) |>
+      mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
+      na.omit() |>
+      mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |>
+      filter(Årstall %in% c(ref.year, cur.year)) |>
+      select(-`Antall menn`, -`Antall kvinner`) |> group_by(Avdelingskode) |>
+      mutate(`Antall totalt`=max(`Antall totalt`)) |>
+      ungroup() |>
+      spread(Årstall, `Percent Male`) -> d.tmp
+    bgdat=data.frame(v=-10:110) %>%
+      mutate(c=case_when(#v>40 & v<60 ~ 0,
+        T ~ abs(v-50)))
+    grid.maj.x=c(0,25,50,75,100)
+    grid.maj.y=c(0,25,50,75,100)
+    grid.min.x=c(12.5, 37.5, 62.5, 87.5)
+    grid.min.y=c(12.5, 37.5, 62.5, 87.5)
+    
+    if(input$level2_prestigeplot_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
+    d.tmp |> 
+      ggplot(aes(alpha=highlight))+
+      geom_rect(data=bgdat, aes(xmin=-Inf, xmax=Inf, ymin=v, ymax=v+1, fill=c), alpha=1, show.legend=F)+
+      scale_fill_gradientn(colours=c("#6b9733","#fec200","#b64a1a"))+
+      geom_abline(slope=1, intercept=0, color="white", size=1)+
+      geom_vline(xintercept = grid.maj.x, color="white", size=0.5)+
+      geom_vline(xintercept = grid.min.x, color="white", size=0.1)+
+      geom_hline(yintercept = grid.maj.y, color="white", size=0.5)+
+      geom_hline(yintercept = grid.min.y, color="white", size=0.1)+
+      geom_point(aes_(x=as.name(ref.year), y=as.name(cur.year), 
+                      size=as.name("Antall totalt"), color=as.name("Kortnavn")))+
+      geom_text_repel(aes_(as.name(ref.year), y=as.name(cur.year), 
+                           #color=as.name("Kortnavn"), 
+                           label=as.name("Kortnavn")),
+                      #arrow = arrow(),#length = unit(0.03, "npc"), type = "closed", ends = "first"),
+                      force=60)+
+      scale_x_continuous(expand = c(.1, .1)) +
+      scale_y_continuous(expand = c(0, 0)) +
+      scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
+      labs(x=glue("Gender balance (% male) in {ref.year}"),
+           y=glue("Gender balance (% male) in {cur.year}"))+
+      coord_fixed()+
+      theme(panel.background = element_rect(fill = NA))
+  })  
+  
 } ## DEBUG: enable.level2
   
   # ------------------------------------------------------------------------
@@ -591,6 +650,65 @@ if(enable.level3) { ##DEBUG
         geom_blank()
     }
   })
+  
+  #'
+  #' "Prestige plot"
+  #'------------
+  output$level3_prestigeplot <- renderPlot({
+    sel.uni=rv.level1.selected_uni() 
+    sel.fac= rv.level2.selected_fac()
+    sel.inst <- rv.level3.selected_inst()
+    
+    cur.year=max(level3.employees$Årstall)
+    ref.year=input$level3_prestigeplot_refyear
+    
+    level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac) |>
+      left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode",
+                                       "Avdelingsnavn","Kortnavn","Fakultetsnavn")) |>
+      mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
+      na.omit() |>
+      mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |>
+      filter(Årstall %in% c(ref.year, cur.year)) |>
+      select(-`Antall menn`, -`Antall kvinner`) |> group_by(Avdelingskode) |>
+      mutate(`Antall totalt`=max(`Antall totalt`)) |>
+      ungroup() |>
+      spread(Årstall, `Percent Male`) -> d.tmp
+    bgdat=data.frame(v=-10:110) %>%
+      mutate(c=case_when(#v>40 & v<60 ~ 0,
+        T ~ abs(v-50)))
+    grid.maj.x=c(0,25,50,75,100)
+    grid.maj.y=c(0,25,50,75,100)
+    grid.min.x=c(12.5, 37.5, 62.5, 87.5)
+    grid.min.y=c(12.5, 37.5, 62.5, 87.5)
+    
+    if(input$level3_prestigeplot_hideunselected){
+      d.tmp |> filter(highlight) -> d.tmp
+    }
+    
+    d.tmp |> 
+      ggplot(aes(alpha=highlight))+
+      geom_rect(data=bgdat, aes(xmin=-Inf, xmax=Inf, ymin=v, ymax=v+1, fill=c), alpha=1, show.legend=F)+
+      scale_fill_gradientn(colours=c("#6b9733","#fec200","#b64a1a"))+
+      geom_abline(slope=1, intercept=0, color="white", size=1)+
+      geom_vline(xintercept = grid.maj.x, color="white", size=0.5)+
+      geom_vline(xintercept = grid.min.x, color="white", size=0.1)+
+      geom_hline(yintercept = grid.maj.y, color="white", size=0.5)+
+      geom_hline(yintercept = grid.min.y, color="white", size=0.1)+
+      geom_point(aes_(x=as.name(ref.year), y=as.name(cur.year), 
+                      size=as.name("Antall totalt"), color=as.name("Kortnavn")))+
+      geom_text_repel(aes_(as.name(ref.year), y=as.name(cur.year), 
+                           #color=as.name("Kortnavn"), 
+                           label=as.name("Kortnavn")),
+                      #arrow = arrow(),#length = unit(0.03, "npc"), type = "closed", ends = "first"),
+                      force=60)+
+      scale_x_continuous(expand = c(.1, .1)) +
+      scale_y_continuous(expand = c(0, 0)) +
+      scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
+      labs(x=glue("Gender balance (% male) in {ref.year}"),
+           y=glue("Gender balance (% male) in {cur.year}"))+
+      coord_fixed()+
+      theme(panel.background = element_rect(fill = NA))
+  })    
   
 } ## DEBUG: enable.level3  
   

@@ -205,7 +205,28 @@ body <- dashboardBody(
                     status = "info"
                   ),  
                   title="Gender Balance (all students)", 
-                  width=6, height="600px"),                
+                  width=6, height="600px"),   
+              box(
+                dropdownButton(
+                  p("The figure displays the current proportion of male employees
+                (y-axis) against the proportion of male employees in a previous year.
+                Institutions located in the green area of the figure have currently a good
+                      gender balance."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level2_prestigeplot"), 
+                materialSwitch(
+                  inputId = "level2_prestigeplot_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),     
+                selectInput("level2_prestigeplot_refyear", "Reference year: ", 
+                            sort(unique(level2.employees$Årstall),decreasing=T)[-1],
+                            width="33%"),
+                title="Gender Balance (all employees)", 
+                width=6),              
       ),
       
       
@@ -253,7 +274,28 @@ body <- dashboardBody(
                   status = "info"
                 ),  
                 title="Gender Balance (all students)", 
-                width=6, height="600px")             
+                width=6, height="600px"),
+              box(
+                dropdownButton(
+                  p("The figure displays the current proportion of male employees
+                (y-axis) against the proportion of male employees in a previous year.
+                Institutions located in the green area of the figure have currently a good
+                      gender balance."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level3_prestigeplot"), 
+                materialSwitch(
+                  inputId = "level3_prestigeplot_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),     
+                selectInput("level3_prestigeplot_refyear", "Reference year: ", 
+                            sort(unique(level3.employees$Årstall),decreasing=T)[-1],
+                            width="33%"),
+                title="Gender Balance (all employees)", 
+                width=6),                       
       ),
       # ------------------------------------------------------------------------
       # Help
