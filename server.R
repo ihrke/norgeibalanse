@@ -527,20 +527,26 @@ if(enable.level3) { ##DEBUG
       d.tmp |> filter(highlight) -> d.tmp
     }
     
-    d.tmp |> 
-      ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
-      geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
-      geom_hline(yintercept = 50, linetype="dashed", color="grey", size=1)+
-      geom_text_repel(data=d.tmp |> group_by(Kortnavn) |> 
-                        filter(Årstall==max(Årstall)) |> ungroup(), aes(label=Kortnavn), force=50)+
-      scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
-      scale_shape_manual(values=1:dim(lev3)[1])+
-      guides(color = guide_legend(override.aes = list(label=""))) +
-      annotate("text_repel", x=min(d.tmp$Årstall), 
-               y=50+0.02*diff(range(d.tmp$`Percent Male`)), 
-               label="Perfect balance", color="grey") +
-      theme(legend.position="bottom")+
-      coord_cartesian(xlim=range(d.tmp$Årstall))
+    if(dim(d.tmp)[1]>0){
+      d.tmp |> 
+        ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
+        geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
+        geom_hline(yintercept = 50, linetype="dashed", color="grey", size=1)+
+        geom_text_repel(data=d.tmp |> group_by(Kortnavn) |> 
+                          filter(Årstall==max(Årstall)) |> ungroup(), aes(label=Kortnavn), force=50)+
+        scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
+        scale_shape_manual(values=1:dim(lev3)[1])+
+        guides(color = guide_legend(override.aes = list(label=""))) +
+        annotate("text_repel", x=min(d.tmp$Årstall), 
+                 y=50+0.02*diff(range(d.tmp$`Percent Male`)), 
+                 label="Perfect balance", color="grey") +
+        theme(legend.position="bottom")+
+        coord_cartesian(xlim=range(d.tmp$Årstall))
+    } else {
+      d.tmp |> 
+        ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
+        geom_blank()
+    }
   })  
   
   
@@ -564,8 +570,7 @@ if(enable.level3) { ##DEBUG
       d.tmp |> filter(highlight) -> d.tmp
     }
     
-    if(dim(d.tmp)[1]!=0){
-      
+    if(dim(d.tmp)[1]>0){
       d.tmp |> 
         ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
         geom_point(aes(shape=Kortnavn))+geom_line(aes(group=Kortnavn),size=1)+
@@ -580,6 +585,10 @@ if(enable.level3) { ##DEBUG
                  label="Perfect balance", color="grey") +
         theme(legend.position="bottom")+
         coord_cartesian(xlim=range(d.tmp$Årstall))
+    } else {
+      d.tmp |> 
+        ggplot(aes(Årstall, `Percent Male`, color=Kortnavn,alpha=highlight))+
+        geom_blank()
     }
   })
   
