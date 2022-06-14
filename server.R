@@ -298,8 +298,8 @@ if( enable.level2 ){ ## DEBUG
   rv.level2.num_fac <- reactiveVal(NULL)
   
   observe({
-    uni.sel=first(rv.level1.selected_uni())  
-    lev2 <- level2 |> filter(Institusjonskode==uni.sel)
+    sel.uni=first(rv.level1.selected_uni())  
+    lev2 <- level2 |> filter(Institusjonskode==sel.uni)
     
     sel.rows=input$level2table_rows_selected
     if(is.null(sel.rows)){ # show all unis initially
@@ -311,31 +311,60 @@ if( enable.level2 ){ ## DEBUG
   })  
   
   output$level2_title <- renderUI({
-    uni.sel <- first(rv.level1.selected_uni())
+    sel.uni <- first(rv.level1.selected_uni())
     level1 |>
-      filter(Institusjonskode==uni.sel) |>
+      filter(Institusjonskode==sel.uni) |>
       mutate(uniname=glue("{Institusjonsnavn} ({Kortnavn})")) -> d.tmp
     uniname <- d.tmp |> pull(uniname)
 
-    p(img(src=get_logo(uni.sel, version="wide", link_type="www"), width="300px"),
+    p(img(src=get_logo(sel.uni, version="wide", link_type="www"), width="300px"),
       h1(uniname))
   })
   
   output$level2table <- renderDataTable({
-    uni.sel=first(rv.level1.selected_uni())  
+    sel.uni=first(rv.level1.selected_uni())  
     
-    level2 |> filter(Institusjonskode==uni.sel) |>
+    level2 |> filter(Institusjonskode==sel.uni) |>
       select(Fakultetsnavn,Kortnavn)
   }, options=list(paging=T))
 
+  
+  #'
+  #' Total num students/employees
+  #'------------
+  output$level2_total_num <- renderPlot({
+    sel.uni=rv.level1.selected_uni() 
+    sel.fac= rv.level2.selected_fac()
+    
+    level2 |> filter(Institusjonskode==sel.uni) |>
+      left_join(level2.employees, by=c("Institusjonskode", "Fakultetskode")) |>
+      filter(Årstall==max(Årstall)) |>
+      rename(male_employees=`Antall menn`, female_employees=`Antall kvinner`) |>
+      left_join(level2.students, by=c("Institusjonskode", "Fakultetskode", "Årstall")) |>
+      rename(male_students=`Antall menn`, female_students=`Antall kvinner`) |>
+      gather(var, number, male_students, female_students, male_employees, female_employees) |>
+      separate(var, c("gender","type")) |>
+      mutate(highlight=(Fakultetskode %in% sel.fac)) -> d.tmp
+    
+    d.tmp |> 
+      ggplot(aes(x=reorder(Kortnavn, `Antall totalt.x`), y=number, fill=gender,alpha=highlight))+
+      geom_bar(stat="identity")+coord_flip()+
+      labs(y="Number of employees", x="")+
+      scale_fill_manual(values=colors.female.male)+
+      scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
+      facet_wrap(~type,ncol = 2, scales="free_x")+
+      theme(legend.position="top")
+    
+  })  
+  
   #'
   #' Proportion per year
   #'------------
   output$level2_balance_years <- renderPlot({
-    uni.sel=first(rv.level1.selected_uni())  
+    sel.uni=first(rv.level1.selected_uni())  
     sel.fac= rv.level2.selected_fac()
     
-    level2 |> filter(Institusjonskode==uni.sel) |>
+    level2 |> filter(Institusjonskode==sel.uni) |>
       left_join(level2.employees, by=c("Institusjonskode", "Fakultetskode")) |>
       mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp

@@ -171,6 +171,15 @@ body <- dashboardBody(
                   title="Fakulteter", 
                   width=6),
               box(
+                dropdownButton(
+                  p("This figures the total number of students and employees at each university."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level2_total_num"), 
+                title="Total number of employees and students", 
+                width=6),                   
+              box(
                   dropdownButton(
                       p("This figures shows the development of the overall gender balance
                     (Percentage of employees that were men) at the institution over time.
