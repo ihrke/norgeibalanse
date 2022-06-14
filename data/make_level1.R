@@ -34,7 +34,7 @@ websites <- tibble::tribble(
   ~Institusjonskode, ~website,
   "1110", "https://www.uio.no/",
   "1120", "https://www.uib.no/",
-  "1130", "https://uit.no?",
+  "1130", "https://uit.no/",
   "1150", "https://www.ntnu.no/",
   "1160", "https://www.uis.no/",
   "1171", "https://www.uia.no/",
@@ -46,15 +46,6 @@ websites <- tibble::tribble(
 left_join(univ.geo, websites) -> level1
 save(level1, file="data/level1.RData")
 
-#' ===========================================
-#' Gender ratio/all employees universities
-#' ===========================================
-dbhd.222 <- dbh_data(222) # alle tilsatte
-
-dbhd.222 |> filter(Nivå==0) |>
-  select(Institusjonskode, Årstall, starts_with("Antall")) |>
-  filter(Institusjonskode %in% unique(level1$Institusjonskode)) -> level1.employees
-save(level1.employees, file="data/level1_employees.RData")
 
 #' ===========================================
 #' Gender ratio/all employees different stillingskoder
@@ -69,6 +60,25 @@ dbhd.225 |> filter(Institusjonskode %in% unique(level1$Institusjonskode)) |>
             `Antall menn`=sum(`Antall menn`), .groups="drop") |>
   ungroup() -> level1.employees.positions
 save(level1.employees.positions, file="data/level1_employees_positions.RData")
+
+#' ===========================================
+#' Gender ratio/all employees universities
+#' ===========================================
+
+#' Table 222 has only values back until 2015. Replace by aggregating table 225
+# dbhd.222 <- dbh_data(222) # alle tilsatte
+
+# dbhd.222 |> filter(Nivå==0) |>
+#   select(Institusjonskode, Årstall, starts_with("Antall")) |>
+#   filter(Institusjonskode %in% unique(level1$Institusjonskode)) -> level1.employees
+# save(level1.employees, file="data/level1_employees.RData")
+
+level1.employees.positions |>
+  group_by(Institusjonskode, Årstall) |>
+  summarize(`Antall totalt`=sum(`Antall årsverk`),
+            `Antall kvinner`=sum(`Antall kvinner`),
+            `Antall menn`=sum(`Antall menn`), .groups="drop") -> level1.employees
+save(level1.employees, file="data/level1_employees.RData")
 
 #' ===========================================
 #' Students

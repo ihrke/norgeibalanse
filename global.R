@@ -69,6 +69,7 @@ default.positions <- c("Student", "Stipendiat", "Postdoktor", "Førsteamanuensis
 
 load("data/level2.RData")
 load("data/level2_employees.RData")
+load("data/level2_employees_positions.RData")
 load("data/level2_students.RData")
 
 # ------------------------------------------------------------------------

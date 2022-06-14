@@ -336,7 +336,7 @@ if( enable.level2 ){ ## DEBUG
     sel.fac= rv.level2.selected_fac()
     
     level2 |> filter(Institusjonskode==uni.sel) |>
-      left_join(level2.employees, by=c("Institusjonskode", "Avdelingskode")) |>
+      left_join(level2.employees, by=c("Institusjonskode", "Fakultetskode")) |>
       mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
     
@@ -364,11 +364,11 @@ if( enable.level2 ){ ## DEBUG
   #' Proportion (students) per year
   #'------------
   output$level2_balance_students_years <- renderPlot({
-    uni.sel=first(rv.level1.selected_uni())  
+    sel.uni=first(rv.level1.selected_uni())  
     sel.fac= rv.level2.selected_fac()
     
-    level2 |> filter(Institusjonskode==uni.sel) |>
-      left_join(level2.students, by=c("Institusjonskode", "Avdelingskode")) |>
+    level2 |> filter(Institusjonskode==sel.uni) |>
+      left_join(level2.students, by=c("Institusjonskode", "Fakultetskode")) |>
       mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
       na.omit() |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) -> d.tmp
@@ -403,12 +403,12 @@ if( enable.level2 ){ ## DEBUG
     ref.year=input$level2_prestigeplot_refyear
     
     level2 |> filter(Institusjonskode==sel.uni) |>
-      left_join(level2.employees, by=c("Institusjonskode", "Avdelingskode")) |>
+      left_join(level2.employees, by=c("Institusjonskode", "Fakultetskode")) |>
       mutate(highlight=(Fakultetskode %in% sel.fac)) |> 
       na.omit() |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |>
       filter(Årstall %in% c(ref.year, cur.year)) |>
-      select(-`Antall menn`, -`Antall kvinner`) |> group_by(Avdelingskode) |>
+      select(-`Antall menn`, -`Antall kvinner`) |> group_by(Fakultetskode) |>
       mutate(`Antall totalt`=max(`Antall totalt`)) |>
       ungroup() |>
       spread(Årstall, `Percent Male`) -> d.tmp
@@ -577,7 +577,7 @@ if(enable.level3) { ##DEBUG
     
     lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
     
-    lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode) |> 
+    lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode,Kortnavn) |> 
       left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
       mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
@@ -620,8 +620,8 @@ if(enable.level3) { ##DEBUG
     
     lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
 
-    lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode) |> 
-      left_join(level3.students, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
+    lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode, Kortnavn) |> 
+      left_join(level3.students, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |> na.omit() |>
       mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
     
@@ -663,8 +663,7 @@ if(enable.level3) { ##DEBUG
     ref.year=input$level3_prestigeplot_refyear
     
     level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac) |>
-      left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode",
-                                       "Avdelingsnavn","Kortnavn","Fakultetsnavn")) |>
+      left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
       mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
       na.omit() |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |>

@@ -51,18 +51,6 @@ level3 <- dbh_data(210) |>
 save(level3, file="data/level3.RData")
 
 
-#' ===========================================
-#' Gender ratio/all employees universities
-#' ===========================================
-dbhd.222 <- dbh_data(222) # alle tilsatte
-
-dbhd.222 |> filter(Nivå==3, Institusjonskode %in% level1$Institusjonskode) |>
-  group_by(Institusjonskode) |>
-  filter(Avdelingskode %in% level3$Avdelingskode[level3$Institusjonskode==first(Institusjonskode)]) |>
-  ungroup() |>
-  select(Institusjonskode, Avdelingskode, Årstall, starts_with("Antall")) |>
-  left_join(level3) -> level3.employees
-save(level3.employees, file="data/level3_employees.RData")
 
 #' ===========================================
 #' Gender ratio/all employees different stillingskoder
@@ -79,6 +67,30 @@ dbhd.225 |> filter(Institusjonskode %in% unique(level1$Institusjonskode)) |>
   ungroup() -> level3.employees.positions
 save(level3.employees.positions, file="data/level3_employees_positions.RData")
 
+
+#' ===========================================
+#' Gender ratio/all employees universities
+#' ===========================================
+
+#' Table 222 has only values back until 2015. Replace by aggregating table 225
+#' dbhd.222 <- dbh_data(222) # alle tilsatte
+#' 
+#' dbhd.222 |> filter(Nivå==3, Institusjonskode %in% level1$Institusjonskode) |>
+#'   group_by(Institusjonskode) |>
+#'   filter(Avdelingskode %in% level3$Avdelingskode[level3$Institusjonskode==first(Institusjonskode)]) |>
+#'   ungroup() |>
+#'   select(Institusjonskode, Avdelingskode, Årstall, starts_with("Antall")) |>
+#'   left_join(level3) -> level3.employees
+#' save(level3.employees, file="data/level3_employees.RData")
+
+level3.employees.positions |>
+  group_by(Institusjonskode,Fakultetskode,Avdelingskode, Årstall) |>
+  summarize(`Antall totalt`=sum(`Antall årsverk`),
+            `Antall kvinner`=sum(`Antall kvinner`),
+            `Antall menn`=sum(`Antall menn`), .groups="drop") -> level3.employees
+save(level3.employees, file="data/level3_employees.RData")
+
+
 #' ===========================================
 #' Students
 #' ===========================================
@@ -94,8 +106,8 @@ dbhd.123 <- dbh_data(123, group_by=c("Årstall", "Institusjonskode", "Avdelingsk
 
 
 dbhd.123 |> filter(Institusjonskode %in% unique(level1$Institusjonskode)) |>
-  filter(Avdelingskode %in% level3$Avdelingskode) |> 
-  select(Institusjonskode, Avdelingskode, Årstall, starts_with("Antall")) |> 
-  left_join(level3) |> na.omit() -> level3.students
+  mutate(Fakultetskode=str_sub(Avdelingskode, 1,3)) |> 
+  filter(Fakultetskode!="000") |> # remove report at Uni level
+  select(Institusjonskode, Fakultetskode, Avdelingskode, Årstall, starts_with("Antall")) -> level3.students
 save(level3.students, file="data/level3_students.RData")
 
