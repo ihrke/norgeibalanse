@@ -48,8 +48,6 @@ level3 <- dbh_data(210) |>
   mutate(Kortnavn=abbrev_inst(Avdelingsnavn)) |>
   ungroup()
 
-save(level3, file="data/level3.RData")
-
 
 
 #' ===========================================
@@ -90,6 +88,17 @@ level3.employees.positions |>
             `Antall menn`=sum(`Antall menn`), .groups="drop") -> level3.employees
 save(level3.employees, file="data/level3_employees.RData")
 
+
+## add num employees to level2 for sorting
+level3.employees |>
+  group_by(Institusjonskode, Fakultetskode, Avdelingskode) |> 
+  summarize(num_employees_total_inst=`Antall totalt`[Årstall==max(Årstall)], .groups="drop") |> 
+  right_join(level3) |> 
+  left_join(level2 |> select(Institusjonskode,Fakultetskode, num_employees_total, num_employees_total_fac), 
+            by=c("Institusjonskode","Fakultetskode")) |> 
+  arrange(desc(num_employees_total), desc(num_employees_total_fac),desc(num_employees_total_inst)) -> level3
+
+save(level3, file="data/level3.RData")
 
 #' ===========================================
 #' Students

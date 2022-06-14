@@ -44,7 +44,6 @@ websites <- tibble::tribble(
   "1176", "https://www.usn.no/"
 )
 left_join(univ.geo, websites) -> level1
-save(level1, file="data/level1.RData")
 
 
 #' ===========================================
@@ -79,6 +78,15 @@ level1.employees.positions |>
             `Antall kvinner`=sum(`Antall kvinner`),
             `Antall menn`=sum(`Antall menn`), .groups="drop") -> level1.employees
 save(level1.employees, file="data/level1_employees.RData")
+
+## add num employees to level1 for sorting
+level1.employees |>
+  group_by(Institusjonskode) |>
+  summarize(num_employees_total=`Antall totalt`[Årstall==max(Årstall)]) |>
+  left_join(level1) |>
+  arrange(desc(num_employees_total)) -> level1
+save(level1, file="data/level1.RData")
+
 
 #' ===========================================
 #' Students

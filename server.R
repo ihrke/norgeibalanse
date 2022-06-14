@@ -344,7 +344,11 @@ if( enable.level2 ){ ## DEBUG
       rename(male_students=`Antall menn`, female_students=`Antall kvinner`) |>
       gather(var, number, male_students, female_students, male_employees, female_employees) |>
       separate(var, c("gender","type")) |>
-      mutate(highlight=(Fakultetskode %in% sel.fac)) -> d.tmp
+      mutate(highlight=T) -> d.tmp 
+    
+    if(!is.null(sel.fac)){
+      d.tmp |> mutate(highlight=(Fakultetskode %in% sel.fac)) -> d.tmp
+    }
     
     d.tmp |> 
       ggplot(aes(x=reorder(Kortnavn, `Antall totalt.x`), y=number, fill=gender,alpha=highlight))+
@@ -526,6 +530,42 @@ if(enable.level3) { ##DEBUG
       select(Avdelingsnavn, Kortnavn)
   }, options=list(paging=T))
 
+  
+  #'
+  #' Total num students/employees
+  #'------------
+  output$level3_total_num <- renderPlot({
+    sel.uni=first(rv.level1.selected_uni())
+    sel.fac <- first(rv.level2.selected_fac())
+    sel.inst <- rv.level3.selected_inst()
+    
+    level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac) |>
+      left_join(level3.employees |> filter(Årstall==max(Årstall)), by=c("Institusjonskode", "Fakultetskode","Avdelingskode")) |>
+      rename(male_employees=`Antall menn`, female_employees=`Antall kvinner`) |>
+      left_join(level3.students, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode", "Årstall")) |>
+      rename(male_students=`Antall menn`, female_students=`Antall kvinner`) |>
+      gather(var, number, male_students, female_students, male_employees, female_employees) |>
+      separate(var, c("gender","type")) |>
+      mutate(highlight=T) -> d.tmp
+    
+    if(!is.null(sel.inst)) {
+      d.tmp |> mutate(highlight=(Avdelingskode %in% sel.inst)) -> d.tmp
+    }
+    
+    d.tmp |> 
+      ggplot(aes(x=fct_reorder(Kortnavn, `Antall totalt.x`, .fun=function(x){
+        if(is.na(x)) 
+          x=0
+        median(x)
+      }), y=number, fill=gender,alpha=highlight))+
+      geom_bar(stat="identity")+coord_flip()+
+      labs(y="Number of employees", x="")+
+      scale_fill_manual(values=colors.female.male)+
+      scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
+      facet_wrap(~type,ncol = 2, scales="free_x")+
+      theme(legend.position="top")
+    
+  })    
   
   #'
   #' Separate boxes with diverging pips over years for selected institutes

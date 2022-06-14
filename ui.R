@@ -247,6 +247,15 @@ body <- dashboardBody(
               box(DT::dataTableOutput("level3table"), 
                   title="Institutes", 
                   width=6),
+              box(
+                dropdownButton(
+                  p("This figures the total number of students and employees at each university."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level3_total_num"), 
+                title="Total number of employees and students", 
+                width=6),                   
               uiOutput("level3_divpips"), ## individual diverging pips plots for selected institutes (over years)
               box(
                 dropdownButton(

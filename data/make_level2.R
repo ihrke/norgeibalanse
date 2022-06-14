@@ -85,6 +85,14 @@ level2.employees.positions |>
             `Antall menn`=sum(`Antall menn`), .groups="drop") -> level2.employees
 save(level2.employees, file="data/level2_employees.RData")
 
+## add num employees to level2 for sorting
+level2.employees |>
+  group_by(Institusjonskode, Fakultetskode) |> 
+  summarize(num_employees_total_fac=`Antall totalt`[Årstall==max(Årstall)]) |> 
+  right_join(level2) |> 
+  left_join(level1 |> select(Institusjonskode, num_employees_total), by="Institusjonskode") |> 
+  arrange(desc(num_employees_total), desc(num_employees_total_fac)) -> level2
+save(level2, file="data/level2.RData")
 
 #' ===========================================
 #' Students
