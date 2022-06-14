@@ -333,7 +333,7 @@ if( enable.level2 ){ ## DEBUG
   #' Total num students/employees
   #'------------
   output$level2_total_num <- renderPlot({
-    sel.uni=rv.level1.selected_uni() 
+    sel.uni=first(rv.level1.selected_uni())
     sel.fac= rv.level2.selected_fac()
     
     level2 |> filter(Institusjonskode==sel.uni) |>
@@ -425,7 +425,7 @@ if( enable.level2 ){ ## DEBUG
   #' "Prestige plot"
   #'------------
   output$level2_prestigeplot <- renderPlot({
-    sel.uni=rv.level1.selected_uni() 
+    sel.uni=first(rv.level1.selected_uni())
     sel.fac= rv.level2.selected_fac()
     
     cur.year=max(level2.employees$Årstall)
@@ -602,14 +602,21 @@ if(enable.level3) { ##DEBUG
     sel.uni <- first(rv.level1.selected_uni())
     sel.fac <- first(rv.level2.selected_fac())
     sel.inst <- rv.level3.selected_inst()
-
+    print(sel.uni)
+    print(sel.fac)
+    print(sel.inst)
     
     lev3 <- level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac)
     
     lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode,Kortnavn) |> 
       left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
-      mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
+      mutate(highlight=T) |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
+    
+    if(!is.null(sel.inst)){
+      d.tmp |> 
+        mutate(highlight=(Avdelingskode %in% sel.inst)) -> d.tmp   
+    }
     
     if(input$level3_balance_years_hideunselected){
       d.tmp |> filter(highlight) -> d.tmp
@@ -651,8 +658,13 @@ if(enable.level3) { ##DEBUG
 
     lev3 |> select(Institusjonskode, Fakultetskode, Avdelingskode, Kortnavn) |> 
       left_join(level3.students, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |> na.omit() |>
-      mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
+      mutate(highlight=T) |> 
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |> na.omit() -> d.tmp
+    
+    if(!is.null(sel.inst)){
+      d.tmp |> 
+        mutate(highlight=(Avdelingskode %in% sel.inst)) -> d.tmp   
+    }    
     
     if(input$level3_balance_students_years_hideunselected){
       d.tmp |> filter(highlight) -> d.tmp
@@ -684,8 +696,8 @@ if(enable.level3) { ##DEBUG
   #' "Prestige plot"
   #'------------
   output$level3_prestigeplot <- renderPlot({
-    sel.uni=rv.level1.selected_uni() 
-    sel.fac= rv.level2.selected_fac()
+    sel.uni=first(rv.level1.selected_uni() )
+    sel.fac= first(rv.level2.selected_fac())
     sel.inst <- rv.level3.selected_inst()
     
     cur.year=max(level3.employees$Årstall)
@@ -693,7 +705,7 @@ if(enable.level3) { ##DEBUG
     
     level3 |> filter(Institusjonskode==sel.uni, Fakultetskode==sel.fac) |>
       left_join(level3.employees, by=c("Institusjonskode", "Fakultetskode", "Avdelingskode")) |>
-      mutate(highlight=ifelse(is.null(sel.inst), rep(T,n()), (Avdelingskode %in% sel.inst))) |> 
+      mutate(highlight=T) |> 
       na.omit() |>
       mutate(`Percent Male`=100*`Antall menn`/`Antall totalt`) |>
       filter(Årstall %in% c(ref.year, cur.year)) |>
@@ -701,6 +713,12 @@ if(enable.level3) { ##DEBUG
       mutate(`Antall totalt`=max(`Antall totalt`)) |>
       ungroup() |>
       spread(Årstall, `Percent Male`) -> d.tmp
+    
+    if(!is.null(sel.inst)){
+      d.tmp |> 
+        mutate(highlight=(Avdelingskode %in% sel.inst)) -> d.tmp   
+    }
+    
     bgdat=data.frame(v=-10:110) %>%
       mutate(c=case_when(#v>40 & v<60 ~ 0,
         T ~ abs(v-50)))
