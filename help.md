@@ -30,7 +30,7 @@ Lær mer om konseptet kjønnsbalanse i: Mittner, Lilli. 2023. «Kjønnsbalanse»
 
 ***************************************
 
-## Balancintor|HE - Gender Balance in Higher Education in Norway
+## Balancinator|HE - Gender Balance in Higher Education in Norway
 
 The Balancinator|HE is a free and open-source software to visualize distribution of men and women within a specific unit of higher education in Norway. It was originally created in 2020 by Lilli & Matthias Mittner. It was developed within the Prestige Project (2018-2021/281862), a research and intervention project with the goal to promote gender balance in research leadership at UiT The Arctic University of Norway. 
 
