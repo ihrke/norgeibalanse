@@ -5,7 +5,7 @@ Balancinator|HE er en gratis og åpen programvare for å visualisere distribusjo
 
 Balancinator|HE visualiserer numeriske data tilgjengelig i database for statistikk om høyere utdanning i Norge (https://dbh.hkdir.no/).
 
-## Med Balancinator|HE kan du:
+### Med Balancinator|HE kan du:
 - visualisere kjønnsbalanse på ulike måter
 - kartlegge endringer i kjønnsbalansen over tid innenfor og på tvers av ulike enheter
 - last ned bildefiler av høy kvalitet for din rapport, presentasjon, plakat, roll-up etc.
@@ -18,7 +18,7 @@ Kildekoden ligger på: https://github.com/ihrke/norgeibalanse. Ta en titt på de
 
 Lær mer om konseptet kjønnsbalanse i: Mittner, Lilli. 2023. «Kjønnsbalanse». I Gender Diversity, Equity, and Inclusion in Academia: A Conceptual Framework for Sustainable Transformation, redigert av Melina Duarte, Katrin Losleben og Kjersti Fjørtoft. Routledge.
 
-## Hvordan bruke Balancinator|HE?
+### Hvordan bruke Balancinator|HE?
 1. Velg din enhet (etter institutt, fakultet eller universitet)
 2. Se opptil 6 forskjellige typer tomter
 3. Juster kategorier (karrieresteg, stillingskategori)
@@ -36,7 +36,7 @@ The Balancinator|HE is a free and open-source software to visualize distribution
 
 Balancinator|HE visualizes numeric data available at the National Database for Higher Education Statistics in Norway in realtime (https://dbh.hkdir.no/). 
 
-## Balancinator|HE allows you to:
+### Balancinator|HE allows you to:
 - visualize gender balance in different ways
 - map changes in the gender balance over time within and across different units
 - download high-quality image files for your report, presentation, poster, roll-up etc.
@@ -49,7 +49,7 @@ The source code is located at: https://github.com/ihrke/norgeibalanse. Have a lo
 
 Learn more about the concept of Gender Balance in: Mittner, Lilli. 2023. “Gender Balance.” In Gender Diversity, Equity, and Inclusion in Academia: A Conceptual Framework for Sustainable Transformation, edited by Melina Duarte, Katrin Losleben, and Kjersti Fjørtoft. Routledge.
 
-## How to use Balancinator|HE?
+### How to use Balancinator|HE?
 1.	Choose your unit (by institute, faculty, university)
 2.	View up to 6 different types of plots
 3.	Adjust categories (career stage, job description)
