@@ -325,7 +325,7 @@ body <- dashboardBody(
 )
 
 dashboardPage(
-    dashboardHeader(title = "Norge i Balanse"),
+    dashboardHeader(title = "Balancinator|HE"),
     sidebar,
     body
 )
