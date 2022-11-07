@@ -16,7 +16,7 @@ Balancinator|HE visualiserer numeriske data tilgjengelig i database for statisti
 
 Kildekoden ligger på: https://github.com/ihrke/norgeibalanse. Ta en titt på den originale Balancinator-webappen (https://en.uit.no/resources/balancinator) en webapp for å visualisere kjønnbalanse ved å fylle ut Excel-ark i stedet for å skrive programmeringskode.
 
-Lær mer om konseptet kjønnsbalanse i: Mittner, Lilli. 2023. «Kjønnsbalanse». I Gender Diversity, Equity, and Inclusion in Academia: A Conceptual Framework for Sustainable Transformation, redigert av Melina Duarte, Katrin Losleben og Kjersti Fjørtoft. Routledge.
+Lær mer om konseptet kjønnsbalanse i: Mittner, Lilli. 2023. «Gender Balance». I Gender Diversity, Equity, and Inclusion in Academia: A Conceptual Framework for Sustainable Transformation, redigert av Melina Duarte, Katrin Losleben og Kjersti Fjørtoft. Routledge.
 
 ### Hvordan bruke Balancinator|HE?
 1. Velg din enhet (etter institutt, fakultet eller universitet)
