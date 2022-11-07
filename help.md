@@ -6,13 +6,13 @@ Balancinator|HE er en gratis og åpen programvare for å visualisere distribusjo
 Balancinator|HE visualiserer numeriske data tilgjengelig i database for statistikk om høyere utdanning i Norge (https://dbh.hkdir.no/).
 
 ## Med Balancinator|HE kan du:
-• visualisere kjønnsbalanse på ulike måter
-• kartlegge endringer i kjønnsbalansen over tid innenfor og på tvers av ulike enheter
-• last ned bildefiler av høy kvalitet for din rapport, presentasjon, plakat, roll-up etc.
-• anvende aktuelle tall fra database for statistikk om høyere utdanning i Norge
-• identifisere enheter i din organisasjon som har behov for likestillingstiltak
-• evaluere effekten av likestillingstiltak på enhetsnivå
-• utvikle effektiv og mer kjønnsbevisst ledelsespraksis ved din institusjon
+- visualisere kjønnsbalanse på ulike måter
+- kartlegge endringer i kjønnsbalansen over tid innenfor og på tvers av ulike enheter
+- last ned bildefiler av høy kvalitet for din rapport, presentasjon, plakat, roll-up etc.
+- anvende aktuelle tall fra database for statistikk om høyere utdanning i Norge
+- identifisere enheter i din organisasjon som har behov for likestillingstiltak
+- evaluere effekten av likestillingstiltak på enhetsnivå
+- utvikle effektiv og mer kjønnsbevisst ledelsespraksis ved din institusjon
 
 Kildekoden ligger på: https://github.com/ihrke/norgeibalanse. Ta en titt på den originale Balancinator-webappen (https://en.uit.no/resources/balancinator) en webapp for å visualisere kjønnbalanse ved å fylle ut Excel-ark i stedet for å skrive programmeringskode.
 
@@ -25,8 +25,8 @@ Lær mer om konseptet kjønnsbalanse i: Mittner, Lilli. 2023. «Kjønnsbalanse»
 4. Last ned bilder i .png- eller .pdf-format
 
 ### Kontaktinformasjon
-Matthias Mittner <matthias.mittner@uit.no>
-Lilli Mittner <lilli.mittner@uit.no>
+- Matthias Mittner <matthias.mittner@uit.no>
+- Lilli Mittner <lilli.mittner@uit.no>
 
 ***************************************
 
@@ -57,5 +57,5 @@ Learn more about the concept of Gender Balance in: Mittner, Lilli. 2023. “Gend
 
 
 ### Contact information
-Matthias Mittner <matthias.mittner@uit.no>
-Lilli Mittner <lilli.mittner@uit.no>
+- Matthias Mittner <matthias.mittner@uit.no>
+- Lilli Mittner <lilli.mittner@uit.no>
