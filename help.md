@@ -45,7 +45,7 @@ Balancinator|HE visualizes numeric data available at the National Database for H
 - evaluate the effect of equality measures at unit level
 -	develop effective and more gender-aware management practices at your institution
 
-The source code is located at: https://github.com/ihrke/norgeibalanse. Have a look at the original Balancinator webapp (https://en.uit.no/resources/balancinator) a web app to build generic plots by inserting simple excel sheets instead of writing programming code.
+The source code is located at: https://github.com/ihrke/norgeibalanse. Have a look at the original Balancinator (https://en.uit.no/resources/balancinator), a web app to build generic plots by inserting simple excel sheets instead of writing programming code.
 
 Learn more about the concept of Gender Balance in: Mittner, Lilli. 2023. “Gender Balance.” In Gender Diversity, Equity, and Inclusion in Academia: A Conceptual Framework for Sustainable Transformation, edited by Melina Duarte, Katrin Losleben, and Kjersti Fjørtoft. Routledge.
 
