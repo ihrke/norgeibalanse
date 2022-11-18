@@ -4,7 +4,7 @@ sidebar <- dashboardSidebar(
         menuItem("Level 1: Institutions", tabName = "level1", icon = icon("university")),
         menuItem("Level 2: Faculties", tabName = "level2", icon = icon("school")),
         menuItem("Level 3: Institutes", tabName = "level3", icon = icon("building") ),
-        menuItem("Help", icon = icon("question-circle"), tabName = "help"),
+        menuItem("About", icon = icon("question-circle"), tabName = "help"),
         hr(),
         materialSwitch(
           inputId = "all_hideunselected",
@@ -325,7 +325,7 @@ body <- dashboardBody(
 )
 
 dashboardPage(
-    dashboardHeader(title = "Balancinator|HE"),
+    dashboardHeader(title = "Balancinator"),
     sidebar,
     body
 )

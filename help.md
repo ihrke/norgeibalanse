@@ -28,7 +28,9 @@ Lær mer om konseptet kjønnsbalanse i: Mittner, Lilli. 2023. «Kjønnsbalanse»
 - Matthias Mittner <matthias.mittner@uit.no>
 - Lilli Mittner <lilli.mittner@uit.no>
 
-***************************************
+
+-----------
+
 
 ## Balancintor|HE - Gender Balance in Higher Education in Norway
 
