@@ -40,44 +40,43 @@ body <- dashboardBody(
                     tooltip = tooltipOptions(title = "Click for help")
                   ),
                   plotOutput("level1_total_num"), 
-                  title="Total number of employees and students", 
+                  title="Gender balance traditional plot", 
                   width=6),                
+                box(dropdownButton(
+                  p("This figures shows the development of the overall gender balance
+                    (percentage of students that were men) at the institution over time.
+                      Institutions close to 50% (grey line) have an almost optimal
+                      gender balance."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level1_balance_students_years"), 
+                materialSwitch(
+                  inputId = "level1_balance_students_years_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),                         
+                title="Gender balance journey plot (students)", 
+                width=6),
                 box(
-                    dropdownButton(
+                  dropdownButton(
                     p("This figures shows the development of the overall gender balance
                     (Percentage of employees that were men) at the institution over time.
                       Institutions close to 50% (grey line) have an almost optimal
                       gender balance."),
                     icon = icon("info-circle"), width = "100%", size='sm',
                     tooltip = tooltipOptions(title = "Click for help")
-                    ),
-                    plotOutput("level1_balance_years"), 
-                    materialSwitch(
-                      inputId = "level1_balance_years_hideunselected",
-                      label = "Hide unselected: ",
-                      value = FALSE, 
-                      status = "info"
-                    ),                    
-                    title="Gender Balance (all employees)", 
-                    width=6),
-                box(
-                    dropdownButton(
-                        p("This figures shows the development of the overall gender balance
-                    (percentage of students that were men) at the institution over time.
-                      Institutions close to 50% (grey line) have an almost optimal
-                      gender balance."),
-                        icon = icon("info-circle"), width = "100%", size='sm',
-                        tooltip = tooltipOptions(title = "Click for help")
-                    ),
-                    plotOutput("level1_balance_students_years"), 
-                    materialSwitch(
-                      inputId = "level1_balance_students_years_hideunselected",
-                      label = "Hide unselected: ",
-                      value = FALSE, 
-                      status = "info"
-                    ),                         
-                    title="Gender Balance (all students)", 
-                    width=6),                
+                  ),
+                  plotOutput("level1_balance_years"), 
+                  materialSwitch(
+                    inputId = "level1_balance_years_hideunselected",
+                    label = "Hide unselected: ",
+                    value = FALSE, 
+                    status = "info"
+                  ),                    
+                  title="Gender balance journey plot (staff)", 
+                  width=6),                
                 box(
                     dropdownButton(
                     p("The figure displays the current proportion of male employees
@@ -97,7 +96,7 @@ body <- dashboardBody(
                     selectInput("level1_prestigeplot_refyear", "Reference year: ", 
                                 sort(unique(level1.employees$Årstall),decreasing=T)[-1],
                                 width="33%"),
-                    title="Gender Balance (all employees)", 
+                    title="Prestige plot", 
                     width=6),
                 box(                    
                     dropdownButton(
@@ -128,7 +127,7 @@ body <- dashboardBody(
                                     width="80%"),
                         height="60px",
                         ),
-                    title="Gender Balance by position (all employees)", 
+                    title="Leaky-pipeline plot", 
                     width=6),                
                 box(                    
                     dropdownButton(
@@ -158,7 +157,7 @@ body <- dashboardBody(
                                )
                   #  ), collapsible = TRUE, width=12, title="Configure Plot",
                   ),
-                    title="Gender Balance by position (all employees)", 
+                    title="Blueprint plot", 
                     width=6),
                 
         ),
@@ -177,44 +176,44 @@ body <- dashboardBody(
                   tooltip = tooltipOptions(title = "Click for help")
                 ),
                 plotOutput("level2_total_num"), 
-                title="Total number of employees and students", 
+                title="Gender balance traditional plot", 
                 width=6),                   
               box(
-                  dropdownButton(
-                      p("This figures shows the development of the overall gender balance
-                    (Percentage of employees that were men) at the institution over time.
-                      Institutions close to 50% (grey line) have an almost optimal
-                      gender balance."),
-                      icon = icon("info-circle"), width = "100%", size='sm',
-                      tooltip = tooltipOptions(title = "Click for help")
-                  ),
-                  plotOutput("level2_balance_years",height="500px"), 
-                  materialSwitch(
-                    inputId = "level2_balance_years_hideunselected",
-                    label = "Hide unselected: ",
-                    value = FALSE, 
-                    status = "info"
-                  ),  
-                  title="Gender Balance (all employees)", 
-                  width=6, height="600px"),     
-              box(
-                  dropdownButton(
-                      p("This figures shows the development of the overall gender balance
+                dropdownButton(
+                  p("This figures shows the development of the overall gender balance
                     (percentage of students that were men) at the institution over time.
                       Institutions close to 50% (grey line) have an almost optimal
                       gender balance."),
-                      icon = icon("info-circle"), width = "100%", size='sm',
-                      tooltip = tooltipOptions(title = "Click for help")
-                  ),
-                  plotOutput("level2_balance_students_years", height="500px"), 
-                  materialSwitch(
-                    inputId = "level2_balance_students_years_hideunselected",
-                    label = "Hide unselected: ",
-                    value = FALSE, 
-                    status = "info"
-                  ),  
-                  title="Gender Balance (all students)", 
-                  width=6, height="600px"),   
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level2_balance_students_years", height="500px"), 
+                materialSwitch(
+                  inputId = "level2_balance_students_years_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),  
+                title="Gender balance journey plot (students)", 
+                width=6, height="600px"), 
+              box(
+                dropdownButton(
+                  p("This figures shows the development of the overall gender balance
+                    (Percentage of employees that were men) at the institution over time.
+                      Institutions close to 50% (grey line) have an almost optimal
+                      gender balance."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level2_balance_years",height="500px"), 
+                materialSwitch(
+                  inputId = "level2_balance_years_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),  
+                title="Gender balance journey plot (staff)", 
+                width=6, height="600px"),  
               box(
                 dropdownButton(
                   p("The figure displays the current proportion of male employees
@@ -234,7 +233,7 @@ body <- dashboardBody(
                 selectInput("level2_prestigeplot_refyear", "Reference year: ", 
                             sort(unique(level2.employees$Årstall),decreasing=T)[-1],
                             width="33%"),
-                title="Gender Balance (all employees)", 
+                title="Prestige plot", 
                 width=6),              
       ),
       
@@ -254,27 +253,9 @@ body <- dashboardBody(
                   tooltip = tooltipOptions(title = "Click for help")
                 ),
                 plotOutput("level3_total_num"), 
-                title="Total number of employees and students", 
+                title="Gender balance traditional plot", 
                 width=6),                   
               uiOutput("level3_divpips"), ## individual diverging pips plots for selected institutes (over years)
-              box(
-                dropdownButton(
-                  p("This figures shows the development of the overall gender balance
-                    (Percentage of employees that were men) at the institution over time.
-                      Institutions close to 50% (grey line) have an almost optimal
-                      gender balance."),
-                  icon = icon("info-circle"), width = "100%", size='sm',
-                  tooltip = tooltipOptions(title = "Click for help")
-                ),
-                plotOutput("level3_balance_years",height="500px"), 
-                materialSwitch(
-                  inputId = "level3_balance_years_hideunselected",
-                  label = "Hide unselected: ",
-                  value = FALSE, 
-                  status = "info"
-                ),  
-                title="Gender Balance (all employees)", 
-                width=6, height="600px"),     
               box(
                 dropdownButton(
                   p("This figures shows the development of the overall gender balance
@@ -291,8 +272,26 @@ body <- dashboardBody(
                   value = FALSE, 
                   status = "info"
                 ),  
-                title="Gender Balance (all students)", 
-                width=6, height="600px"),
+                title="Gender balance journey plot (students)", 
+                width=6, height="600px"),                
+              box(
+                dropdownButton(
+                  p("This figures shows the development of the overall gender balance
+                    (Percentage of employees that were men) at the institution over time.
+                      Institutions close to 50% (grey line) have an almost optimal
+                      gender balance."),
+                  icon = icon("info-circle"), width = "100%", size='sm',
+                  tooltip = tooltipOptions(title = "Click for help")
+                ),
+                plotOutput("level3_balance_years",height="500px"), 
+                materialSwitch(
+                  inputId = "level3_balance_years_hideunselected",
+                  label = "Hide unselected: ",
+                  value = FALSE, 
+                  status = "info"
+                ),  
+                title="Gender balance journey plot (staff)", 
+                width=6, height="600px"),  
               box(
                 dropdownButton(
                   p("The figure displays the current proportion of male employees
@@ -312,7 +311,7 @@ body <- dashboardBody(
                 selectInput("level3_prestigeplot_refyear", "Reference year: ", 
                             sort(unique(level3.employees$Årstall),decreasing=T)[-1],
                             width="33%"),
-                title="Gender Balance (all employees)", 
+                title="Prestige plot", 
                 width=6),                       
       ),
       # ------------------------------------------------------------------------
@@ -325,7 +324,7 @@ body <- dashboardBody(
 )
 
 dashboardPage(
-    dashboardHeader(title = "Balancinator"),
+    dashboardHeader(title = "BalanceXplorer"),
     sidebar,
     body
 )

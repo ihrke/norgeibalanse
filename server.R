@@ -94,7 +94,8 @@ if(enable.level1) {## DEBUG
       scale_fill_manual(values=colors.female.male)+
       scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
       facet_wrap(~type,ncol = 2, scales="free_x")+
-      theme(legend.position="top")
+      theme(legend.position="top")+
+      theme(legend.title= element_blank())
     
   })
 
@@ -120,7 +121,7 @@ if(enable.level1) {## DEBUG
       scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
       scale_shape_manual(values=1:dim(level1)[1])+
       guides(color = guide_legend(override.aes = list(label=""))) +
-      annotate("text_repel", x=min(level1.employees$Årstall), y=50+0.02*diff(range(d.tmp$`Percent Male`)), label="Perfect balance", color="grey") 
+      annotate("text_repel", x=min(level1.employees$Årstall), y=50+0.02*diff(range(d.tmp$`Percent Male`)), label="Perfect balance", color="grey")
   })
   
   #'
@@ -357,7 +358,8 @@ if( enable.level2 ){ ## DEBUG
       scale_fill_manual(values=colors.female.male)+
       scale_alpha_manual(values=c(0.3, 1.0), breaks=c(F,T), guide="none") +
       facet_wrap(~type,ncol = 2, scales="free_x")+
-      theme(legend.position="top")
+      theme(legend.position="top")+
+      theme(legend.title= element_blank())
     
   })  
   
