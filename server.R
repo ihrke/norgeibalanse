@@ -32,7 +32,8 @@ if(enable.level1) {## DEBUG
     
   output$level1map <- renderLeaflet({
     leaflet(data = level1) |>
-      addProviderTiles(providers$Stamen.Watercolor) |>
+      addTiles() |>
+      #addProviderTiles(providers$Stamen.Watercolor) |>
       addMarkers(~long,~lat, label=~Institusjonsnavn, popup = ~popup,
                  clusterOptions = markerClusterOptions())  
   })
